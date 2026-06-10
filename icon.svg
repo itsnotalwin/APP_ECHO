@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#000000"/>
+  <!-- Outer faint ring -->
+  <circle cx="256" cy="256" r="188" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+  <!-- Main ring -->
+  <circle cx="256" cy="256" r="140" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="7"/>
+  <!-- Middle ring -->
+  <circle cx="256" cy="256" r="82" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="4"/>
+  <!-- Centre dot -->
+  <circle cx="256" cy="256" r="22" fill="rgba(255,255,255,0.9)"/>
+  <!-- Specular top-left highlight -->
+  <circle cx="204" cy="196" r="42" fill="rgba(255,255,255,0.04)"/>
+</svg>
