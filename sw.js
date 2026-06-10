@@ -1,7 +1,7 @@
 /* Human Map — Service Worker
    Strategy: cache-first for app shell, network-first for fonts */
 
-const CACHE = 'humanmap-v1';
+const CACHE = 'humanmap-v2';
 const SHELL = [
   './',
   './index.html',
@@ -34,8 +34,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Let Google Fonts go to network (non-critical, graceful degradation)
-  if (url.hostname.includes('fonts.g')) {
+  // Let external CDNs and Firebase APIs go to network (fonts, Firebase SDK, Firestore)
+  if (url.hostname.includes('fonts.g') || url.hostname.includes('gstatic.com') || url.hostname.includes('googleapis.com')) {
     e.respondWith(
       fetch(e.request).catch(() => new Response('', { status: 408 }))
     );

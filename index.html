@@ -459,15 +459,71 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);cursor:p
   </div>
 </div>
 
-<script>
+<script type="module">
 'use strict';
+// ═══════════════════════════════════════════════════════
+// FIREBASE
+// ═══════════════════════════════════════════════════════
+// NOTE: Firestore rules must allow public read/write (no auth).
+// Set rules to: allow read, write: if true;
+import { initializeApp }        from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+import { getAnalytics }         from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-analytics.js';
+import { getFirestore, doc, getDoc, setDoc }
+                                from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+const _fbCfg = {
+  apiKey:            "AIzaSyDY2B9Pk57BYpu8yfWBT79IH5f1xYC3eds",
+  authDomain:        "echo-os-5a368.firebaseapp.com",
+  projectId:         "echo-os-5a368",
+  storageBucket:     "echo-os-5a368.firebasestorage.app",
+  messagingSenderId: "173884588648",
+  appId:             "1:173884588648:web:43091aaba12eda003831dd",
+  measurementId:     "G-MT81CMKBCG"
+};
+const _fbApp = initializeApp(_fbCfg);
+const _db    = getFirestore(_fbApp);
+const _DOC   = doc(_db, 'humanmap', 'world'); // single shared document
+try { getAnalytics(_fbApp); } catch {}        // analytics optional
+
 // ═══════════════════════════════════════════════════════
 // STORAGE
 // ═══════════════════════════════════════════════════════
 const Storage = {
   KEY:'humanmap_v1',
-  save(d){try{localStorage.setItem(this.KEY,JSON.stringify(d))}catch(e){}},
-  load(){try{const r=localStorage.getItem(this.KEY);return r?JSON.parse(r):null}catch(e){return null}},
+  _pushTimer:null,
+
+  // Load from Firestore first, fall back to localStorage if offline
+  async load(){
+    try {
+      const snap = await getDoc(_DOC);
+      if(snap.exists()){
+        const data = snap.data();
+        try{localStorage.setItem(this.KEY,JSON.stringify(data))}catch{}
+        return data;
+      }
+    } catch(e){
+      console.warn('[HumanMap] Firestore unavailable, using localStorage:',e.message);
+    }
+    try{const r=localStorage.getItem(this.KEY);return r?JSON.parse(r):null}catch{return null}
+  },
+
+  // Instant localStorage write + debounced Firestore push
+  save(d){
+    try{localStorage.setItem(this.KEY,JSON.stringify(d))}catch{}
+    clearTimeout(this._pushTimer);
+    this._pushTimer=setTimeout(()=>this._push(d),2000);
+  },
+
+  async _push(d){
+    setSyncStatus('syncing');
+    try{
+      await setDoc(_DOC,JSON.parse(JSON.stringify(d)));
+      setSyncStatus('saved');
+    }catch(e){
+      console.warn('[HumanMap] Firestore write failed:',e.message);
+      setSyncStatus('error');
+    }
+  },
+
   clear(){localStorage.removeItem(this.KEY)},
   exportJSON(d){const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='humanmap-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)},
   importJSON(file,cb){const r=new FileReader();r.onload=e=>{try{cb(null,JSON.parse(e.target.result))}catch(x){cb(new Error('bad JSON'),null)}};r.readAsText(file)}
@@ -813,20 +869,11 @@ const world=new World();
 rend.resize();
 window.addEventListener('resize',()=>rend.resize());
 
-// ── Splash screen
+// ── Splash screen (hide is triggered after data load completes)
+let _hideSplash;
 (function(){
   const splash=document.getElementById('splash');
-  function hideSplash(){
-    splash.classList.add('out');
-    setTimeout(()=>splash&&splash.remove(),560);
-  }
-  if(document.fonts&&document.fonts.ready){
-    document.fonts.ready.then(()=>setTimeout(hideSplash,320));
-  } else {
-    setTimeout(hideSplash,900);
-  }
-  // Failsafe: always hide after 2.5s
-  setTimeout(hideSplash,2500);
+  _hideSplash=function(){splash.classList.add('out');setTimeout(()=>splash&&splash.remove(),560)};
 })();
 
 // ── Toast
@@ -859,13 +906,28 @@ function showConfirm(msg,btnLabel,danger){
   });
 }
 
-// ── Saved badge
+// ── Saved badge + cloud sync status
 let _saveTimer=null;
 function flashSaved(){
   const badge=document.getElementById('saved-badge');
+  // Only update text if not mid-sync
+  if(badge.textContent!=='syncing…'){badge.textContent='saved'}
   badge.classList.add('show');
   clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(()=>badge.classList.remove('show'),1800);
+  _saveTimer=setTimeout(()=>badge.classList.remove('show'),1200);
+}
+function setSyncStatus(s){
+  const badge=document.getElementById('saved-badge');
+  clearTimeout(_saveTimer);
+  if(s==='syncing'){
+    badge.textContent='syncing…';badge.classList.add('show');
+  } else if(s==='saved'){
+    badge.textContent='synced ✓';badge.classList.add('show');
+    _saveTimer=setTimeout(()=>{badge.classList.remove('show');badge.textContent='saved'},2200);
+  } else if(s==='error'){
+    badge.textContent='offline';badge.classList.add('show');
+    _saveTimer=setTimeout(()=>badge.classList.remove('show'),3500);
+  }
 }
 
 // ── Shortcuts overlay
@@ -890,12 +952,16 @@ window.addEventListener('appinstalled',()=>{
   toast('Human Map installed ✓');
 });
 
-// Load data
-const saved=Storage.load();
-if(saved&&saved.people&&saved.people.length){world.fromJSON(saved)}else{world.loadSample()}
+// Load data (async — awaits Firestore, falls back to localStorage)
+const saved=await Storage.load();
+if(saved&&saved.people&&saved.people.length){world.fromJSON(saved)}
+else{world.loadSample();Storage.save(world.toJSON())} // seed Firestore on first run
 world.setChange(()=>{Storage.save(world.toJSON());flashSaved()});
 requestAnimationFrame(()=>{cam.fitNodes(world.people,window.innerWidth,window.innerHeight);cam.x=cam.tx;cam.y=cam.ty;cam.scale=cam.ts});
 updateCount();
+// Hide splash now that data is ready — wait for fonts too if possible
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(()=>setTimeout(_hideSplash,240))}else{setTimeout(_hideSplash,600)}
+setTimeout(_hideSplash,5000); // hard failsafe
 
 // ── Render loop
 function loop(){cam.update(isDrag);rend.render(world.state,cam,hovId,selId,connMode?connSrc:null);requestAnimationFrame(loop)}
