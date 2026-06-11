@@ -344,7 +344,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);cursor:p
     <div class="mcard">
       <div class="mhdr"><h2 id="pmod-title">New Person</h2><button class="ib modal-x"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
       <div class="mbdy">
-        <div class="pua"><div id="pphoto" class="pcirc"><span id="pinits"></span></div><button class="upbtn" id="pupbtn">Upload photo</button><input type="file" id="pphfile" accept="image/*" class="hidden"></div>
         <div class="fg">
           <div class="fl"><label class="flb">Name</label><input class="fi" type="text" id="pname" placeholder="Full name" autocomplete="off"></div>
           <div class="fl"><label class="flb">Notes</label><textarea class="fta" id="pnotes" placeholder="Anything worth remembering…" rows="3"></textarea></div>
@@ -403,7 +402,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);cursor:p
   <div id="stbar">
     <div id="stl"><span id="ncount"></span><span id="saved-badge">saved</span></div>
     <div id="str">
-      <span id="cmhint" class="hidden">Click a person to connect — <kbd>ESC</kbd> to cancel</span>
+      <span id="cmhint" class="hidden">Tap a person to connect — <kbd>ESC</kbd> to cancel</span>
       <span id="khint">Press <kbd>/</kbd> for commands · <kbd>?</kbd> for shortcuts</span>
     </div>
   </div>
@@ -459,15 +458,72 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);cursor:p
   </div>
 </div>
 
-<script>
+<script type="module">
 'use strict';
+// ═══════════════════════════════════════════════════════
+// FIREBASE
+// ═══════════════════════════════════════════════════════
+// NOTE: Firestore rules must allow public read/write (no auth).
+// Set rules to: allow read, write: if true;
+import { initializeApp }        from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+import { getAnalytics }         from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-analytics.js';
+import { getFirestore, doc, getDoc, setDoc }
+                                from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+const _fbCfg = {
+  apiKey:            "AIzaSyDY2B9Pk57BYpu8yfWBT79IH5f1xYC3eds",
+  authDomain:        "echo-os-5a368.firebaseapp.com",
+  projectId:         "echo-os-5a368",
+  storageBucket:     "echo-os-5a368.firebasestorage.app",
+  messagingSenderId: "173884588648",
+  appId:             "1:173884588648:web:43091aaba12eda003831dd",
+  measurementId:     "G-MT81CMKBCG"
+};
+const _fbApp = initializeApp(_fbCfg);
+const _db    = getFirestore(_fbApp);
+const _DOC   = doc(_db, 'humanmap', 'world'); // single shared document
+const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+try { getAnalytics(_fbApp); } catch {}        // analytics optional
+
 // ═══════════════════════════════════════════════════════
 // STORAGE
 // ═══════════════════════════════════════════════════════
 const Storage = {
   KEY:'humanmap_v1',
-  save(d){try{localStorage.setItem(this.KEY,JSON.stringify(d))}catch(e){}},
-  load(){try{const r=localStorage.getItem(this.KEY);return r?JSON.parse(r):null}catch(e){return null}},
+  _pushTimer:null,
+
+  // Load from Firestore first, fall back to localStorage if offline
+  async load(){
+    try {
+      const snap = await getDoc(_DOC);
+      if(snap.exists()){
+        const data = snap.data();
+        try{localStorage.setItem(this.KEY,JSON.stringify(data))}catch{}
+        return data;
+      }
+    } catch(e){
+      console.warn('[HumanMap] Firestore unavailable, using localStorage:',e.message);
+    }
+    try{const r=localStorage.getItem(this.KEY);return r?JSON.parse(r):null}catch{return null}
+  },
+
+  // Instant localStorage write + debounced Firestore push
+  save(d){
+    try{localStorage.setItem(this.KEY,JSON.stringify(d))}catch{}
+    clearTimeout(this._pushTimer);
+    this._pushTimer=setTimeout(()=>this._push(d),2000);
+  },
+
+  async _push(d){
+    setSyncStatus('syncing');
+    try{
+      await setDoc(_DOC,JSON.parse(JSON.stringify(d)));
+      setSyncStatus('saved');
+    }catch(e){
+      console.warn('[HumanMap] Firestore write failed:',e.message);
+      setSyncStatus('error');
+    }
+  },
+
   clear(){localStorage.removeItem(this.KEY)},
   exportJSON(d){const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='humanmap-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)},
   importJSON(file,cb){const r=new FileReader();r.onload=e=>{try{cb(null,JSON.parse(e.target.result))}catch(x){cb(new Error('bad JSON'),null)}};r.readAsText(file)}
@@ -735,7 +791,8 @@ class Renderer {
     ctx.font="300 72px 'Cormorant',serif";ctx.fillStyle='rgba(255,255,255,.05)';
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('◉',w/2,h/2-28);
     ctx.font="200 13px 'DM Sans',sans-serif";ctx.fillStyle='rgba(255,255,255,.3)';
-    ctx.fillText('Right-click anywhere to add your first person',w/2,h/2+30);
+    const hint=_isMobile?'Long-press anywhere to add your first person':'Right-click anywhere to add your first person';
+    ctx.fillText(hint,w/2,h/2+30);
     ctx.restore();
   }
   _img(id,url){if(!this.imgCache[id]){const i=new Image();i.src=url;this.imgCache[id]=i}return this.imgCache[id]}
@@ -813,20 +870,11 @@ const world=new World();
 rend.resize();
 window.addEventListener('resize',()=>rend.resize());
 
-// ── Splash screen
+// ── Splash screen (hide is triggered after data load completes)
+let _hideSplash;
 (function(){
   const splash=document.getElementById('splash');
-  function hideSplash(){
-    splash.classList.add('out');
-    setTimeout(()=>splash&&splash.remove(),560);
-  }
-  if(document.fonts&&document.fonts.ready){
-    document.fonts.ready.then(()=>setTimeout(hideSplash,320));
-  } else {
-    setTimeout(hideSplash,900);
-  }
-  // Failsafe: always hide after 2.5s
-  setTimeout(hideSplash,2500);
+  _hideSplash=function(){splash.classList.add('out');setTimeout(()=>splash&&splash.remove(),560)};
 })();
 
 // ── Toast
@@ -859,13 +907,28 @@ function showConfirm(msg,btnLabel,danger){
   });
 }
 
-// ── Saved badge
+// ── Saved badge + cloud sync status
 let _saveTimer=null;
 function flashSaved(){
   const badge=document.getElementById('saved-badge');
+  // Only update text if not mid-sync
+  if(badge.textContent!=='syncing…'){badge.textContent='saved'}
   badge.classList.add('show');
   clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(()=>badge.classList.remove('show'),1800);
+  _saveTimer=setTimeout(()=>badge.classList.remove('show'),1200);
+}
+function setSyncStatus(s){
+  const badge=document.getElementById('saved-badge');
+  clearTimeout(_saveTimer);
+  if(s==='syncing'){
+    badge.textContent='syncing…';badge.classList.add('show');
+  } else if(s==='saved'){
+    badge.textContent='synced ✓';badge.classList.add('show');
+    _saveTimer=setTimeout(()=>{badge.classList.remove('show');badge.textContent='saved'},2200);
+  } else if(s==='error'){
+    badge.textContent='offline';badge.classList.add('show');
+    _saveTimer=setTimeout(()=>badge.classList.remove('show'),3500);
+  }
 }
 
 // ── Shortcuts overlay
@@ -890,12 +953,16 @@ window.addEventListener('appinstalled',()=>{
   toast('Human Map installed ✓');
 });
 
-// Load data
-const saved=Storage.load();
-if(saved&&saved.people&&saved.people.length){world.fromJSON(saved)}else{world.loadSample()}
+// Load data (async — awaits Firestore, falls back to localStorage)
+const saved=await Storage.load();
+if(saved&&saved.people&&saved.people.length){world.fromJSON(saved)}
+else{world.loadSample();Storage.save(world.toJSON())} // seed Firestore on first run
 world.setChange(()=>{Storage.save(world.toJSON());flashSaved()});
 requestAnimationFrame(()=>{cam.fitNodes(world.people,window.innerWidth,window.innerHeight);cam.x=cam.tx;cam.y=cam.ty;cam.scale=cam.ts});
 updateCount();
+// Hide splash now that data is ready — wait for fonts too if possible
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(()=>setTimeout(_hideSplash,240))}else{setTimeout(_hideSplash,600)}
+setTimeout(_hideSplash,5000); // hard failsafe
 
 // ── Render loop
 function loop(){cam.update(isDrag);rend.render(world.state,cam,hovId,selId,connMode?connSrc:null);requestAnimationFrame(loop)}
@@ -948,14 +1015,26 @@ canvas.addEventListener('contextmenu',e=>{
   h?showNodeCtx(h.id,e.clientX,e.clientY):showCanvasCtx(wp.x,wp.y,e.clientX,e.clientY);
 });
 // Touch
+let _longPressTimer=null;
 canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
+  clearTimeout(_longPressTimer);
   if(e.touches.length===2){pinching=true;lastPinch=pDist(e.touches);isDrag=false;return}
   const t=e.touches[0];lastX=t.clientX;lastY=t.clientY;isDrag=true;hasDrag=false;
   dragNode=(rend.hit(t.clientX,t.clientY,world.people,cam)||{}).id||null;
+  // Long-press → context menu (same as right-click on desktop)
+  _longPressTimer=setTimeout(()=>{
+    if(hasDrag)return;
+    isDrag=false;dragNode=null;
+    const h=rend.hit(t.clientX,t.clientY,world.people,cam);
+    const wp=cam.s2w(t.clientX,t.clientY);
+    if(h)showNodeCtx(h.id,t.clientX,Math.min(t.clientY,window.innerHeight-220));
+    else showCanvasCtx(wp.x,wp.y,t.clientX,t.clientY);
+  },520);
 },{passive:false});
 canvas.addEventListener('touchmove',e=>{
   e.preventDefault();
+  clearTimeout(_longPressTimer);
   if(e.touches.length===2&&pinching){const d=pDist(e.touches),f=d/lastPinch,cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2;cam.zoomAt(cx,cy,f);lastPinch=d;return}
   if(!isDrag||e.touches.length!==1)return;
   const t=e.touches[0],dx=t.clientX-lastX,dy=t.clientY-lastY;if(Math.abs(dx)>1||Math.abs(dy)>1)hasDrag=true;
@@ -963,9 +1042,21 @@ canvas.addEventListener('touchmove',e=>{
   lastX=t.clientX;lastY=t.clientY;
 },{passive:false});
 canvas.addEventListener('touchend',e=>{
+  clearTimeout(_longPressTimer);
   if(pinching&&e.touches.length<2){pinching=false;return}
   if(!isDrag)return;isDrag=false;
-  if(!hasDrag){const t=e.changedTouches[0];const h=rend.hit(t.clientX,t.clientY,world.people,cam);if(h)selectP(h.id)}
+  if(!hasDrag){
+    const t=e.changedTouches[0];
+    const h=rend.hit(t.clientX,t.clientY,world.people,cam);
+    if(connMode){
+      // Complete or cancel connection
+      if(h&&h.id!==connSrc)doConnect(connSrc,h.id);
+      else if(!h)exitConn();
+    } else {
+      if(h)h.id===selId?deselect():selectP(h.id);
+      else if(selId)deselect();
+    }
+  }
   dragNode=null;
 });
 function pDist(tt){const dx=tt[0].clientX-tt[1].clientX,dy=tt[0].clientY-tt[1].clientY;return Math.sqrt(dx*dx+dy*dy)}
@@ -1122,25 +1213,19 @@ document.querySelectorAll('.dpt').forEach(b=>b.addEventListener('click',()=>rend
 
 // ── Person modal
 const pmod=document.getElementById('pmod');
-let editPid=null,pendPx=0,pendPy=0,photoURL=null,_pendDates=[];
+let editPid=null,pendPx=0,pendPy=0,_pendDates=[];
 function openPmod(id,wx,wy){
-  editPid=id||null;pendPx=wx||0;pendPy=wy||0;photoURL=null;
+  editPid=id||null;pendPx=wx||0;pendPy=wy||0;
   document.getElementById('pmod-title').textContent=id?'Edit Person':'New Person';
   document.getElementById('psave').textContent=id?'Save Changes':'Add Person';
   const pname=document.getElementById('pname'),pnotes=document.getElementById('pnotes'),
-        ptags=document.getElementById('ptags'),plastcontact=document.getElementById('plastcontact'),
-        pphoto=document.getElementById('pphoto'),pinits=document.getElementById('pinits');
+        ptags=document.getElementById('ptags'),plastcontact=document.getElementById('plastcontact');
   if(id){
     const p=world.getPerson(id);
     pname.value=p.name;pnotes.value=p.notes||'';ptags.value=(p.tags||[]).join(', ');
-    plastcontact.value=p.lastContacted||'';
-    _pendDates=[...(p.dates||[])];
-    photoURL=p.photo||null;
-    pphoto.innerHTML=p.photo?`<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover">`:'';
-    pinits.textContent=p.photo?'':p.name.split(/\s+/).map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+    plastcontact.value=p.lastContacted||'';_pendDates=[...(p.dates||[])];
   }else{
-    pname.value=pnotes.value=ptags.value=plastcontact.value='';
-    _pendDates=[];pphoto.innerHTML='';pinits.textContent='';
+    pname.value=pnotes.value=ptags.value=plastcontact.value='';_pendDates=[];
   }
   renderDatesForm();
   pmod.classList.remove('hidden');setTimeout(()=>pname.focus(),80);
@@ -1171,23 +1256,6 @@ document.getElementById('ptoday-btn').addEventListener('click',()=>{
 });
 pmod.querySelectorAll('.modal-x').forEach(el=>el.addEventListener('click',closePmod));
 pmod.querySelector('.mbd').addEventListener('click',closePmod);
-document.getElementById('pname').addEventListener('input',function(){
-  if(!editPid){
-    const init=this.value.split(/\s+/).map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
-    document.getElementById('pinits').textContent=init;
-    if(!photoURL)document.getElementById('pphoto').innerHTML=init;
-  }
-});
-document.getElementById('pupbtn').addEventListener('click',()=>document.getElementById('pphfile').click());
-document.getElementById('pphfile').addEventListener('change',function(){
-  const f=this.files[0];if(!f)return;
-  const r=new FileReader();r.onload=e=>{
-    photoURL=e.target.result;
-    document.getElementById('pphoto').innerHTML=`<img src="${photoURL}" style="width:100%;height:100%;object-fit:cover">`;
-    document.getElementById('pinits').textContent='';
-    if(editPid)rend.invalidate(editPid);
-  };r.readAsDataURL(f);
-});
 document.getElementById('psave').addEventListener('click',()=>{
   const name=document.getElementById('pname').value.trim();if(!name){document.getElementById('pname').focus();return}
   const dates=_pendDates.filter(d=>d.label||d.date);
@@ -1197,9 +1265,9 @@ document.getElementById('psave').addEventListener('click',()=>{
     tags:document.getElementById('ptags').value.split(',').map(t=>t.trim()).filter(Boolean),
     dates,
     lastContacted:document.getElementById('plastcontact').value||null,
-    photo:photoURL
+    photo:editPid?(world.getPerson(editPid)?.photo||null):null
   };
-  if(editPid){world.updatePerson(editPid,data);if(photoURL)rend.invalidate(editPid);if(selId===editPid)renderDP(world.getPerson(editPid));toast('Changes saved')}
+  if(editPid){world.updatePerson(editPid,data);if(selId===editPid)renderDP(world.getPerson(editPid));toast('Changes saved')}
   else{const p=world.addPerson({...data,x:pendPx,y:pendPy});updateCount();toast(p.name+' added');setTimeout(()=>selectP(p.id),80)}
   closePmod();
 });
