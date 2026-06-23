@@ -1,6 +1,6 @@
 {
-  "name": "Human Map",
-  "short_name": "Human Map",
+  "name": "APP_ECHO",
+  "short_name": "APP_ECHO",
   "description": "A private map of your relationships and memories",
   "start_url": "./",
   "scope": "./",
