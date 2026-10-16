@@ -6,25 +6,25 @@
 <title>Human Map</title>
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#eeeeec">
 <meta name="description" content="A private map of your relationships and memories">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Human Map">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=DM+Sans:opsz,wght@9..40,200;9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400&family=DM+Sans:opsz,wght@9..40,200;9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#000;--s1:#0a0a0a;--s2:#111;--s3:#1c1c1c;--s4:#252525;
-  --b:rgba(255,255,255,.07);--bm:rgba(255,255,255,.12);--bh:rgba(255,255,255,.22);
-  --t1:rgba(255,255,255,.92);--t2:rgba(255,255,255,.55);--t3:rgba(255,255,255,.3);
-  --r8:8px;--r14:14px;--r20:20px;--r28:28px;
-  --fd:'Cormorant',serif;--fb:'DM Sans',sans-serif;
+  --bg:#eeeeec;--s1:#fff;--s2:#f6f6f4;--s3:#ebebe9;--s4:#dddddb;
+  --b:rgba(0,0,0,.08);--bm:rgba(0,0,0,.16);--bh:rgba(0,0,0,.36);
+  --t1:#0c0c0c;--t2:rgba(12,12,12,.62);--t3:rgba(12,12,12,.42);
+  --r8:10px;--r14:18px;--r20:26px;--r28:34px;--sh:0 1px 2px rgba(0,0,0,.05),0 20px 50px -14px rgba(0,0,0,.2);--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .3 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");--hatch:repeating-linear-gradient(135deg,rgba(0,0,0,.75) 0 1px,transparent 1px 4px);
+  --fd:'Newsreader',Georgia,serif;--fb:'DM Sans',sans-serif;
   --eo:cubic-bezier(.16,1,.3,1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -286,6 +286,47 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4);cursor:p
 #install-bar button{padding:5px 12px;border-radius:100px;border:1px solid rgba(255,255,255,.15);background:transparent;color:var(--t1);font-family:var(--fb);font-size:.75rem;cursor:pointer;transition:all 150ms}
 #install-bar button:hover{background:rgba(255,255,255,.08)}
 #install-bar .ib-x{width:20px;height:20px;border:none;background:transparent;color:var(--t3);cursor:pointer;font-size:.9rem;padding:0}
+/* ── Ink & paper refresh ───────────────────────────────── */
+h1,h2,h3{font-weight:700;letter-spacing:-.012em;line-height:1.1}
+.lt{font-weight:700;letter-spacing:-.01em;font-size:1.05rem}
+#tb{border-radius:100px}
+#tb,#zc,#install-bar{background:rgba(255,255,255,.94);border-color:var(--b);box-shadow:var(--sh)}
+#sc,#cc,#cm,.mcard,#cfm-card,#shortcuts-card{background:var(--s1);border:1px solid var(--b);box-shadow:var(--sh)}
+#dp,#upc{background:var(--s1);border-left:0;box-shadow:-28px 0 70px -30px rgba(0,0,0,.22)}
+#so,#cp,.mbd,#cfm .mbd,#shortcuts .mbd{background:rgba(238,238,236,.72)}
+.mhdr,#upc-head{background:none;border-bottom-color:var(--b)}
+#dpn,.mhdr h2,#upc-head h2,#shortcuts-card h2{font-weight:700;letter-spacing:-.012em;color:var(--t1)}
+#dpn{font-size:1.75rem}.mhdr h2,#upc-head h2{font-size:1.4rem}
+.flb,.ssl,.dpsl,.upc-sl{text-transform:none;letter-spacing:0;font-size:.78rem;font-weight:500;color:var(--t2)}
+.dpt.act{border-bottom-color:var(--t1)}
+.bp,.btn-danger{background:var(--t1);color:#fff}.bp:hover,.btn-danger:hover{background:#2b2b2b}
+.fi:focus,.fta:focus{background:var(--s1);border-color:var(--t1)}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:none;opacity:.5}
+.cmi.dng,.cnr:hover,.drm:hover{color:var(--t1)}.cmi.dng:hover,.cnr:hover,.drm:hover{background:var(--s3)}
+.zb{border-bottom-color:var(--b)}.zb:hover{background:var(--s3)}
+.sk-row{border-bottom-color:var(--b)}
+.sia,.cna,.upc-av{background:var(--t1);color:#fff;border-color:var(--t1)}
+/* status reads as ink weight + a hatch swatch, not traffic-light colour */
+.lc-fresh,.up-today{background:var(--t1);color:#fff;border-color:var(--t1)}
+.lc-ok,.up-soon{background:var(--s1);color:var(--t1);border-color:var(--bh)}
+.lc-due,.up-over{background:var(--s3);color:var(--t1);border:1px dashed var(--bh)}
+.lc-cold{background:var(--s1);color:var(--t1);border-color:var(--t1)}
+.lc-cold::before{content:"";width:9px;height:9px;border-radius:50%;border:1px solid var(--t1);background:var(--hatch)}
+/* the one bold moment: grainy ink blob */
+#dph{margin:14px 14px 0;padding:22px 20px;border:0;border-radius:46px 26px 44px 30px;background:#0c0c0c var(--grain) 0 0/160px 160px;color:#fff;--t1:#fff;--t2:rgba(255,255,255,.72);--t3:rgba(255,255,255,.5);--s3:rgba(255,255,255,.12);--s4:rgba(255,255,255,.18);--b:rgba(255,255,255,.2);--bm:rgba(255,255,255,.3);--bh:rgba(255,255,255,.55)}
+#dpav{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.28)}
+#dph .lc-badge{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35)}
+#dph .lc-fresh{background:#fff;color:#0c0c0c;border-color:#fff}
+#splash{background:var(--bg);overflow:hidden}
+#splash::before{content:"";position:absolute;width:min(78vw,440px);aspect-ratio:1;border-radius:58% 42% 47% 53%/52% 46% 54% 48%;background:#0c0c0c var(--grain) 0 0/160px 160px}
+.spl-g,.spl-t{position:relative;color:#fff}
+.spl-t{font-weight:700;font-size:1.7rem;letter-spacing:-.01em;text-transform:none}
+.spl-d{display:none}
+#cmhint{background:var(--t1);color:#fff;border:0}
+#cmhint kbd{color:rgba(255,255,255,.65);border-color:rgba(255,255,255,.3);background:transparent}
+.toast{background:var(--t1);color:#fff;border:0}.toast.err{background:#fff;color:var(--t1);border:1px solid var(--t1)}
+#saved-badge{color:var(--t3)}
+#install-bar button{border-color:var(--bm)}#install-bar button:hover{background:var(--s3)}
 </style>
 </head>
 <body>
@@ -547,8 +588,8 @@ class Renderer {
       if(!hov&&!sel&&!src)return;
       const r=this.NR,{x,y}=p;
       const outerR=sel?r+32:src?r+30:r+20;
-      const col=src?'255,200,60':'255,255,255';
-      const alpha=sel?.20:src?.17:.09;
+      const col='12,12,12';
+      const alpha=sel?.13:src?.1:.06;
       const g=ctx.createRadialGradient(x,y,r*.25,x,y,outerR);
       g.addColorStop(0,`rgba(${col},${alpha})`);
       g.addColorStop(1,'rgba(0,0,0,0)');
@@ -565,33 +606,22 @@ class Renderer {
     if(!this._bgCache||this._bgW!==w||this._bgH!==h){
       const oc=document.createElement('canvas');oc.width=w;oc.height=h;
       const o=oc.getContext('2d');
-      o.fillStyle='#000';o.fillRect(0,0,w,h);
-      // 6 atmospheric nebula blobs — rich colors, multi-stop falloff
-      const blobs=[
-        {x:w*.15,y:h*.20,r:w*.58,c:'22,12,52',a:.20},   // deep indigo NW
-        {x:w*.85,y:h*.80,r:w*.50,c:'8,18,52', a:.17},   // ocean blue SE
-        {x:w*.78,y:h*.16,r:w*.42,c:'6,28,36', a:.14},   // dark teal NE
-        {x:w*.22,y:h*.85,r:w*.44,c:'30,10,38',a:.13},   // violet SW
-        {x:w*.50,y:h*.48,r:w*.28,c:'14,10,28',a:.09},   // subtle center lift
-        {x:w*.62,y:h*.62,r:w*.35,c:'4,16,40', a:.10},   // cool mid
-      ];
-      blobs.forEach(b=>{
-        const g=o.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
-        g.addColorStop(0,   `rgba(${b.c},${b.a})`);
-        g.addColorStop(.45, `rgba(${b.c},${(b.a*.35).toFixed(3)})`);
-        g.addColorStop(1,   'rgba(0,0,0,0)');
-        o.fillStyle=g;o.fillRect(0,0,w,h);
-      });
-      // Hard vignette
-      const v=o.createRadialGradient(w/2,h/2,Math.min(w,h)*.22,w/2,h/2,Math.max(w,h)*.76);
-      v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.65)');
-      o.fillStyle=v;o.fillRect(0,0,w,h);
+      o.fillStyle='#eeeeec';o.fillRect(0,0,w,h);
+      // pale amoeba shapes, off-centre (the reference's grey blobs)
+      const amoeba=(cx,cy,R,k,fill)=>{o.beginPath();for(let i=0;i<=96;i++){const a=i/96*Math.PI*2,rr=R*(1+.16*Math.sin(a*2+k)+.09*Math.sin(a*3+k*1.7)),px=cx+Math.cos(a)*rr*1.12,py=cy+Math.sin(a)*rr*.9;i?o.lineTo(px,py):o.moveTo(px,py)}o.closePath();o.fillStyle=fill;o.fill()};
+      amoeba(w*.2,h*.28,Math.min(w,h)*.42,1.3,'rgba(0,0,0,.035)');
+      amoeba(w*.82,h*.74,Math.min(w,h)*.5,4.1,'rgba(0,0,0,.045)');
+      // chalk grain
+      const gc=document.createElement('canvas');gc.width=gc.height=128;
+      const gx=gc.getContext('2d'),gd=gx.createImageData(128,128);
+      for(let i=0;i<gd.data.length;i+=4)gd.data[i+3]=Math.random()*16;
+      gx.putImageData(gd,0,0);o.fillStyle=o.createPattern(gc,'repeat');o.fillRect(0,0,w,h);
       this._bgCache=oc;this._bgW=w;this._bgH=h;
     }
     ctx.drawImage(this._bgCache,0,0);
   }
   // ── Stars: screen-space with gentle parallax + per-star twinkling
-  _drawStars(ctx,cam,w,h){
+  _drawStars(ctx,cam,w,h){return;
     const px=cam.x*.055,py=cam.y*.055;
     this._stars.forEach(s=>{
       const x=((s.nx*w+px)%w+w)%w;
@@ -600,12 +630,12 @@ class Renderer {
       const a=s.ba*twinkle;
       ctx.globalAlpha=a;
       ctx.beginPath();ctx.arc(x,y,s.r,0,Math.PI*2);
-      ctx.fillStyle='#fff';ctx.fill();
+      ctx.fillStyle='#0c0c0c';ctx.fill();
     });
     ctx.globalAlpha=1;
   }
   // ── Animated center glow — single gradient, cheap
-  _drawCenterGlow(ctx,w,h){
+  _drawCenterGlow(ctx,w,h){return;
     const pulse=.68+.32*Math.sin(this.t*.38);
     const r=Math.min(w,h)*.32*pulse;
     const g=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,r);
@@ -616,7 +646,7 @@ class Renderer {
   // ── Grid: dots fade from viewport center
   _grid(cam,w,h){
     const{ctx}=this,gs=55;
-    const ba=Math.min(.48,cam.scale*.42)*.42;
+    const ba=Math.min(.6,cam.scale*.5)*.8;
     if(ba<.004)return;
     const sx=Math.floor(-cam.x/cam.scale/gs)*gs,sy=Math.floor(-cam.y/cam.scale/gs)*gs;
     const ex=sx+w/cam.scale+gs,ey=sy+h/cam.scale+gs;
@@ -628,8 +658,8 @@ class Renderer {
         const a=ba*Math.max(0,1-Math.sqrt(dx*dx+dy*dy)/(maxD*.85));
         if(a<.003)continue;
         ctx.globalAlpha=a;
-        ctx.beginPath();ctx.arc(px,py,.8,0,Math.PI*2);
-        ctx.fillStyle='#fff';ctx.fill();
+        ctx.beginPath();ctx.arc(px,py,1.1,0,Math.PI*2);
+        ctx.fillStyle='#0c0c0c';ctx.fill();
       }
     }
     ctx.globalAlpha=1;
@@ -645,23 +675,23 @@ class Renderer {
     const{ctx}=this,{cx,cy}=this._cp(a.x,a.y,b.x,b.y);
     if(hi){
       ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(cx,cy,b.x,b.y);
-      ctx.strokeStyle='rgba(255,255,255,.055)';ctx.lineWidth=9;ctx.stroke();
+      ctx.strokeStyle='rgba(12,12,12,.05)';ctx.lineWidth=9;ctx.stroke();
     }
     ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(cx,cy,b.x,b.y);
-    ctx.strokeStyle=hi?'rgba(255,255,255,.32)':'rgba(255,255,255,.1)';
+    ctx.strokeStyle=hi?'rgba(12,12,12,.55)':'rgba(12,12,12,.16)';
     ctx.lineWidth=hi?1.4:.7;ctx.stroke();
     if(hi){
       for(let i=0;i<3;i++){
         const t=((this.t*.22+i*.33)%1),fade=Math.sin(t*Math.PI);
         const pt=this._qpt(a.x,a.y,cx,cy,b.x,b.y,t);
         ctx.beginPath();ctx.arc(pt.x,pt.y,2.5,0,Math.PI*2);
-        ctx.fillStyle=`rgba(255,255,255,${(fade*.75).toFixed(3)})`;ctx.fill();
+        ctx.fillStyle=`rgba(12,12,12,${(fade*.8).toFixed(3)})`;ctx.fill();
       }
     }
   }
   _prevLine(x1,y1,x2,y2){
     const{ctx}=this;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
-    ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=.8;
+    ctx.strokeStyle='rgba(12,12,12,.4)';ctx.lineWidth=.8;
     ctx.setLineDash([6,8]);ctx.stroke();ctx.setLineDash([]);
   }
   // ── Nodes
@@ -670,7 +700,7 @@ class Renderer {
     if(sel||src){
       ctx.save();ctx.translate(x,y);ctx.rotate(this.t*(sel?.35:-.4));
       ctx.beginPath();ctx.arc(0,0,r+11,0,Math.PI*2);
-      ctx.strokeStyle=sel?'rgba(255,255,255,.22)':'rgba(255,200,60,.3)';
+      ctx.strokeStyle='rgba(12,12,12,.35)';
       ctx.lineWidth=.8/scale;ctx.setLineDash([4/scale,12/scale]);ctx.stroke();
       ctx.setLineDash([]);ctx.restore();
     }
@@ -689,10 +719,10 @@ class Renderer {
     ctx.fillStyle=spec;ctx.fillRect(x-r,y-r,r*2,r*2);
     ctx.restore();
     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
-    if(sel){ctx.strokeStyle='rgba(255,255,255,.88)';ctx.lineWidth=1.5/scale;}
-    else if(src){ctx.strokeStyle='rgba(255,200,60,.85)';ctx.lineWidth=1.5/scale;}
-    else if(hov){ctx.strokeStyle='rgba(255,255,255,.52)';ctx.lineWidth=1.2/scale;}
-    else{ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=.8/scale;}
+    if(sel){ctx.strokeStyle='#0c0c0c';ctx.lineWidth=1.5/scale;}
+    else if(src){ctx.strokeStyle='rgba(12,12,12,.8)';ctx.lineWidth=1.5/scale;}
+    else if(hov){ctx.strokeStyle='rgba(12,12,12,.7)';ctx.lineWidth=1.2/scale;}
+    else{ctx.strokeStyle='rgba(12,12,12,.3)';ctx.lineWidth=.8/scale;}
     ctx.stroke();
     // Overdue dot — amber indicator top-right when contact is overdue
     if(!sel&&!src&&scale>.35&&p.lastContacted){
@@ -701,9 +731,9 @@ class Renderer {
       if(daysSince>freq){
         const dr=5.5/scale,dx2=x+r*.7,dy2=y-r*.7;
         ctx.beginPath();ctx.arc(dx2,dy2,dr+1/scale,0,Math.PI*2);
-        ctx.fillStyle='rgba(0,0,0,.85)';ctx.fill();
+        ctx.fillStyle='#eeeeec';ctx.fill();
         ctx.beginPath();ctx.arc(dx2,dy2,dr,0,Math.PI*2);
-        const dc=daysSince>freq*3?'255,90,90':daysSince>freq*2?'255,130,60':'255,185,60';
+        const dc=daysSince>freq*3?'12,12,12':daysSince>freq*2?'80,80,80':'150,150,150';
         ctx.fillStyle=`rgba(${dc},.92)`;ctx.fill();
       }
     }
@@ -711,10 +741,10 @@ class Renderer {
       const alpha=Math.min(1,(scale-.22)/.28);
       ctx.save();ctx.globalAlpha=alpha;
       const fs=13/scale;
-      ctx.font=`300 ${fs}px 'DM Sans',sans-serif`;
+      ctx.font=`400 ${fs}px 'DM Sans',sans-serif`;
       ctx.textAlign='center';ctx.textBaseline='top';
-      ctx.shadowColor='rgba(0,0,0,.95)';ctx.shadowBlur=8/scale;ctx.shadowOffsetY=1/scale;
-      ctx.fillStyle=hov||sel?'rgba(255,255,255,.95)':'rgba(255,255,255,.68)';
+      ctx.shadowColor='rgba(238,238,236,.95)';ctx.shadowBlur=6/scale;ctx.shadowOffsetY=0;
+      ctx.fillStyle=hov||sel?'#0c0c0c':'rgba(12,12,12,.72)';
       ctx.fillText(p.name,x,y+r+7/scale);
       ctx.restore();
     }
@@ -722,19 +752,19 @@ class Renderer {
   _initials(ctx,x,y,r,name){
     let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))&0xffffffff;h=(h>>>0)%360;
     const g=ctx.createRadialGradient(x-r*.28,y-r*.32,0,x+r*.1,y+r*.2,r*1.5);
-    g.addColorStop(0,`hsl(${h},12%,22%)`);g.addColorStop(.5,`hsl(${h},8%,12%)`);g.addColorStop(1,`hsl(${h},5%,4%)`);
+    g.addColorStop(0,`hsl(${h},6%,20%)`);g.addColorStop(.5,`hsl(${h},4%,11%)`);g.addColorStop(1,`hsl(${h},3%,5%)`);
     ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);
     const init=name.split(/\s+/).map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
-    ctx.font=`300 ${r*.5}px 'Cormorant',serif`;
+    ctx.font=`700 ${r*.52}px 'Newsreader',Georgia,serif`;
     ctx.fillStyle='rgba(255,255,255,.78)';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=4;
     ctx.fillText(init,x,y+r*.04);ctx.shadowBlur=0;ctx.textBaseline='alphabetic';
   }
   _empty(w,h){
     const{ctx}=this;ctx.save();
-    ctx.font="300 72px 'Cormorant',serif";ctx.fillStyle='rgba(255,255,255,.05)';
+    ctx.font="700 72px 'Newsreader',Georgia,serif";ctx.fillStyle='rgba(12,12,12,.07)';
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('◉',w/2,h/2-28);
-    ctx.font="200 13px 'DM Sans',sans-serif";ctx.fillStyle='rgba(255,255,255,.3)';
+    ctx.font="400 13px 'DM Sans',sans-serif";ctx.fillStyle='rgba(12,12,12,.45)';
     ctx.fillText('Right-click anywhere to add your first person',w/2,h/2+30);
     ctx.restore();
   }
@@ -1065,15 +1095,15 @@ function renderOV(p){
     p.dates.forEach(d=>{
       if(!d.label&&!d.date)return;
       const upcoming=upcomingLabel(d.date);
-      h+=`<div class="dpdi"><span class="dpdl">${esc(d.label||'Date')}</span><span class="dpdv">${fmtDate(d.date)}${upcoming?` <span style="color:rgba(80,220,130,.75);margin-left:6px;font-size:.68rem">${upcoming}</span>`:''}</span></div>`;
+      h+=`<div class="dpdi"><span class="dpdl">${esc(d.label||'Date')}</span><span class="dpdv">${fmtDate(d.date)}${upcoming?` <span style="color:var(--t1);font-weight:500;margin-left:6px;font-size:.68rem">${upcoming}</span>`:''}</span></div>`;
     });
     h+=`</div>`;
   }
   // Stats
   const cc=world.connsOf(p.id).length,mc=world.memoriesOf(p.id).length;
   h+=`<div class="dpsec"><div class="dpsl">At a Glance</div><div style="display:flex;gap:10px">
-    <div style="flex:1;padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r8);text-align:center"><div style="font-family:var(--fd);font-size:1.6rem;font-weight:300">${cc}</div><div style="font-size:.7rem;color:var(--t3);margin-top:3px;letter-spacing:.04em;text-transform:uppercase">Connections</div></div>
-    <div style="flex:1;padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r8);text-align:center"><div style="font-family:var(--fd);font-size:1.6rem;font-weight:300">${mc}</div><div style="font-size:.7rem;color:var(--t3);margin-top:3px;letter-spacing:.04em;text-transform:uppercase">Memories</div></div>
+    <div style="flex:1;padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r8);text-align:center"><div style="font-family:var(--fd);font-size:1.9rem;font-weight:700">${cc}</div><div style="font-size:.7rem;color:var(--t3);margin-top:3px;letter-spacing:.04em;text-transform:uppercase">Connections</div></div>
+    <div style="flex:1;padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r8);text-align:center"><div style="font-family:var(--fd);font-size:1.9rem;font-weight:700">${mc}</div><div style="font-size:.7rem;color:var(--t3);margin-top:3px;letter-spacing:.04em;text-transform:uppercase">Memories</div></div>
   </div></div>`;
   h+=`<button class="dpcb" id="dpcbt">${icoL()} Connect to someone</button>`;
   el.innerHTML=h;
