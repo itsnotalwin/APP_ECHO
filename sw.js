@@ -1,7 +1,7 @@
 /* Human Map — Service Worker
    Strategy: cache-first for app shell, network-first for fonts */
 
-const CACHE = 'humanmap-v1';
+const CACHE = 'humanmap-v1-ink';
 const SHELL = [
   './',
   './index.html',
